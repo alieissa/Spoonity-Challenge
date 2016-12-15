@@ -9,7 +9,9 @@ var _reposDirective = require('./repos.directive.js');
 
 var _repo = require('./repo.service');
 
-angular.module('spoonityApp', ['ngRoute']).config(config).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeRepos', _reposDirective.aeRepos).factory('repoService', _repo.repoService);
+angular.module('spoonityApp', ['ngRoute']).config(config).constant('HTTP', {
+    baseUrl: 'https://api.github.com'
+}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeRepos', _reposDirective.aeRepos).factory('repoService', _repo.repoService);
 
 function config($routeProvider) {
 
@@ -17,8 +19,8 @@ function config($routeProvider) {
         template: '<ae-chart> </ae-chart>'
     }).when('/repos/:username', {
         template: '<ae-repos></ae-repos>'
-    }).when('/test', {
-        template: '<ae-languages><ae-languages>'
+    }).when('/repos/:repo/languages', {
+        template: '<ae-languages></ae-languages>'
     }).otherwise({
         redirectTo: '/'
     });
@@ -63,16 +65,16 @@ exports.aeChart = aeChart;
 },{}],3:[function(require,module,exports){
 'use strict';
 
-// aeChart.$inject = ['reposService'];
-
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-function aeLanguages() {
+aeLanguages.$inject = ['$routeParams', 'repoService'];
+
+function aeLanguages($routeParams, repoService) {
 
     var aeLanguages_ = {
         templateUrl: 'languages.html',
-        controllerAs: 'languages',
+        controllerAs: 'vm',
         controller: controllerFn,
         link: linkFn
     };
@@ -80,7 +82,14 @@ function aeLanguages() {
     return aeLanguages_;
 
     function controllerFn() {
-        // console.log('Language Controller');
+
+        var vm = this;
+
+        repoService.getLanguages($routeParams.repo).then(function (languages) {
+            return vm.languages = languages;
+        }).catch(function (err) {
+            return vm.error = error;
+        });
     }
 
     function linkFn(scope, element, attrs) {
@@ -96,24 +105,70 @@ exports.aeLanguages = aeLanguages;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-repoService.$inject = ['$q', '$http'];
 
-function repoService($q, $http) {
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-    function getAllRepos(username) {
+repoService.$inject = ['$q', '$http', 'HTTP'];
+
+function repoService($q, $http, HTTP) {
+
+    var repoData = void 0;
+    var languages_ = void 0;
+    var content_ = void 0;
+
+    // Returns languages from for repo from repo information
+    function getLanguages(repoName) {
 
         var defer_ = $q.defer();
+
+        var _repoData$filter = repoData.filter(function (repo) {
+            return repo.name === repoName;
+        }),
+            _repoData$filter2 = _slicedToArray(_repoData$filter, 1),
+            repo_ = _repoData$filter2[0];
+
+        console.log(repo_);
+
         var _handleRes = function _handleRes(result) {
-            // parse and return here resolve
-            // defer.resolve(parsedRes)
+            var languages_ = Object.keys(result.data);
+            repo_.languages = languages_;
+            defer_.resolve(languages_);
         };
 
-        // $http.get(`/repos/${username}`).then(_handleRes, (err) => defer.reject(err));
+        if (typeof repo_.languages === 'undefined') {
+            $http.get(repo_.languages_url).then(_handleRes, function (err) {
+                console.log(err);
+                defer_.reject(err);
+            });
+        } else {
+            defer_resolve(repo_.languages);
+        }
 
-        //return defer.promise;
+        return defer_.promise;
     }
 
-    return { getAllRepos: getAllRepos };
+    // Gets Repo information for user
+    function getAllRepos(username) {
+        var defer_ = $q.defer();
+
+        var _handleRes = function _handleRes(result) {
+
+            // Save app
+            repoData = result.data;
+            var repos_ = repoData.map(function (repo) {
+                return repo.name;
+            });
+            defer_.resolve(repos_);
+        };
+
+        $http.get(HTTP.baseUrl + '/users/' + username + '/repos').then(_handleRes, function (err) {
+            defer_.reject(err);
+        });
+
+        return defer_.promise;
+    }
+
+    return { getAllRepos: getAllRepos, getLanguages: getLanguages };
 }
 
 exports.repoService = repoService;
@@ -130,6 +185,7 @@ function aeRepos($route, repoService) {
 
     var aeRepos_ = {
         templateUrl: 'repos.html',
+        restrict: 'E',
         controllerAs: 'vm',
         controller: controllerFn,
         link: linkFn
@@ -138,6 +194,8 @@ function aeRepos($route, repoService) {
     return aeRepos_;
 
     function controllerFn() {
+
+        var vm = this;
 
         var _username = $route.current.params.username;
         repoService.getAllRepos(_username).then(function (repos) {

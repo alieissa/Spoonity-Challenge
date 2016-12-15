@@ -7,6 +7,9 @@ import {repoService} from './repo.service';
 
 angular.module('spoonityApp', ['ngRoute'])
     .config(config)
+    .constant('HTTP', {
+        baseUrl: 'https://api.github.com'
+    })
     .controller('mainCtrl', mainCtrl)
     .directive('aeChart', aeChart)
     .directive('aeLanguages', aeLanguages)
@@ -21,8 +24,8 @@ function config($routeProvider) {
     .when('/repos/:username', {
         template: '<ae-repos></ae-repos>'
     })
-    .when('/test', {
-        template: '<ae-languages><ae-languages>',
+    .when('/repos/:repo/languages', {
+        template: '<ae-languages></ae-languages>',
     })
     .otherwise({
         redirectTo: '/'

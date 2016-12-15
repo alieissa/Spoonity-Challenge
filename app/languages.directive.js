@@ -1,12 +1,12 @@
 'use strict';
 
-// aeChart.$inject = ['reposService'];
+aeLanguages.$inject = ['$routeParams', 'repoService'];
 
-function aeLanguages() {
+function aeLanguages($routeParams, repoService) {
 
     let aeLanguages_ = {
         templateUrl: 'languages.html',
-        controllerAs: 'languages',
+        controllerAs: 'vm',
         controller: controllerFn,
         link: linkFn
     };
@@ -14,7 +14,12 @@ function aeLanguages() {
     return aeLanguages_;
 
     function controllerFn() {
-        // console.log('Language Controller');
+
+        let vm = this;
+
+        repoService.getLanguages($routeParams.repo)
+            .then(languages => vm.languages = languages)
+            .catch(err => vm.error = error);
     }
 
     function linkFn(scope, element, attrs) {
