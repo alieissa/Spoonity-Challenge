@@ -1,12 +1,13 @@
 
-
-
-    <div class="">
-        <p>Languages Template</p>
+    <div>
         <ul>
-            <li ng-repeat="language in vm.languages"><a ng-href="#">{{language}}</a></li>
+            <li ng-repeat="language in vm.languages" class={{language}}>
+                <!-- <button type="button" name="button">{{language}}</button> -->
+                <a ng-href="#/repos/:repo/languages/:language">{{language}}</a>
+            </li>
         </ul>
     </div>
+
     <div style="float:left">
-        <ae-chart><ae-chart>
+        <ae-chart data-content="vm.content"><ae-chart>
     </div>

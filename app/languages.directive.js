@@ -18,11 +18,25 @@ function aeLanguages($routeParams, repoService) {
         let vm = this;
 
         repoService.getLanguages($routeParams.repo)
-            .then(languages => vm.languages = languages)
-            .catch(err => vm.error = error);
+            .then(result => {
+                vm.languages = result.data.languages;
+                // console.log(result);
+                return result.data.mainLanguage;
+            })
+            .then(mainLanguage => {
+                // console.log(mainLanguage);
+                return repoService.getLanguageContent($routeParams.repo, mainLanguage)
+            })
+            // .then(content => console.log(content))
+            // .catch(err => vm.error = error);
+
     }
 
     function linkFn(scope, element, attrs) {
+        // console.log(element.find('button'));
+        // .on('click', function() {
+        //     console.log($routeParams);
+        // });
         // console.log('Language Link');
     }
 }

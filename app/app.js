@@ -3,6 +3,7 @@
 import {aeChart} from './chart.directive.js';
 import {aeLanguages} from './languages.directive.js';
 import {aeRepos} from './repos.directive.js';
+import {repoCtrl} from './repos.controller.js';
 import {repoService} from './repo.service';
 
 angular.module('spoonityApp', ['ngRoute'])
@@ -21,12 +22,17 @@ function config($routeProvider) {
     $routeProvider.when('/', {
         template: '<ae-chart> </ae-chart>'
     })
-    .when('/repos/:username', {
+
+    // List repos for user
+    .when('/users/:username/repos', {
         template: '<ae-repos></ae-repos>'
     })
-    .when('/repos/:repo/languages', {
+
+    //List langs for repo
+    .when('/:repo/languages', {
         template: '<ae-languages></ae-languages>',
     })
+
     .otherwise({
         redirectTo: '/'
     });

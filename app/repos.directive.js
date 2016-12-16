@@ -1,8 +1,9 @@
 'use strict';
 
-aeRepos.$inject = ['$route', 'repoService'];
+aeRepos.$inject = ['$routeParams', 'repoService'];
 
-function aeRepos($route, repoService) {
+// function aeRepos($routeParams, repoService) {
+function aeRepos($routeParams, repoService) {
 
     let aeRepos_ = {
         templateUrl: 'repos.html',
@@ -17,9 +18,14 @@ function aeRepos($route, repoService) {
     function controllerFn() {
 
         let vm = this;
-        
-        let _username = $route.current.params.username;
-        repoService.getAllRepos(_username).then(repos => vm.repos = repos)
+        vm.test = () => {
+            console.log('Test')
+        }
+        console.log($routeParams);
+        // let _username = $state.current.params.username;
+        repoService.getAllRepos($routeParams.username)
+            .then(repos => vm.repos = repos)
+            .catch(err => vm.err = err);
     }
 
     function linkFn(scope, element, attrs) {
