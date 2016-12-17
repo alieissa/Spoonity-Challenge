@@ -1,10 +1,31 @@
 
-    <div class="" style="width: 200px; height: 100%; float: left">
-        <ul>
-            <li ng-repeat="repo in vm.repos"><a ng-href="#/{{repo}}/languages">{{repo}}</a></li>
-            <!-- <li ng-repeat="repo in vm.repos"><a ng-href="#/repos/{{repo}}/languages">{{repo}}</a></li> -->
-        </ul>
-    </div>
-    <div style="float:left">
-        <ae-chart><ae-chart>
-    </div>
+
+
+
+        <div style="float:left; width: 1000px">
+            <div style="background-color: black; width: 100px; height: 56px; float: left">
+            </div>
+            <div style="width: 1000px; height: 56px; margin-left: 126px;">
+
+                <div ng-repeat="repo in vm.repos" class="repo-tab" id={{repo}}name="button"> {{repo|uppercase}}</div>
+                <!-- <ul style="width: 100%; overflow-x: scroll; height: 56px; white-space: nowrap"> -->
+                <!-- </ul> -->
+            </div>
+        </div>
+
+        <div style="width: 1000px; height: 500px">
+
+            <!-- <header style="height:56px; width: 702px">
+                <input type="text" ng-model = "search" name="" placeholder="Enter user name here" >
+                <a ng-href="#/users/{{search}}/repos"> Click Me</a>
+            </header> -->
+
+                <div style="float:left; height: 100%; ">
+                    <ul style="height: 100%">
+                        <li ng-repeat="lang in vm.languages" id={{lang}} ng-click="vm.setLang(lang)"> {{lang|uppercase}}</li>
+                    </ul>
+                </div>
+                <div class="chart" style="max-height: 500px; width: 100%; padding-top: 25px;">
+                    <code class="language-javascript">{{vm.chartContent}}</code>
+                </div>
+        </div>

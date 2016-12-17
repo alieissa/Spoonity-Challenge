@@ -33,7 +33,7 @@ gulp.task('default', gulp.series('build'));
 //------------------------------------------------------------------------------
 
 function build(done) {
-    gulp.watch(['app/**/*', 'assets/css/*', '*.js'], gulp.series(...buildTasks));
+    gulp.watch(['app/*.html', 'assets/css/*', '*.js'], gulp.series(...buildTasks));
     done();
 }
 
