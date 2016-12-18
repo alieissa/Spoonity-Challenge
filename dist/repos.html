@@ -15,31 +15,16 @@
                     <input type="text" name="" value="">
                 </form>
                 <ae-settings></ae-settings>
-                <!-- <i class="material-icons">settings</i> -->
-                <!-- <div ng-repeat="repo in vm.repos" class="repo-tab" id={{repo}}name="button"> {{repo|uppercase}}</div> -->
-                <!-- <ul style="width: 100%; overflow-x: scroll; height: 56px; white-space: nowrap"> -->
-                <!-- </ul> -->
             </div>
         </div>
 
         <div style="width: 1000px;">
-
-            <!-- <header style="height:56px; width: 702px">
-                <input type="text" ng-model = "search" name="" placeholder="Enter user name here" >
-                <a ng-href="#/users/{{search}}/repos"> Click Me</a>
-            </header> -->
-
                 <div style="float:left; height: 100%; position: fixed">
-                    <div class="" style="background-color: grey; width: 200px; height: 56px; color: white">
-                        Header
-                    </div>
-                    <ul style="height: 100%; background-color: #4D394B; margin-top: 0px">
-                        <!-- <li ng-repeat="lang in vm.languages" id={{lang}} ng-click="vm.setLang(lang)"> {{lang|uppercase}}</li> -->
-
+                    <ul style="height: 100%; margin-top: 0px">
                         <li ng-repeat="repo in vm.repos" id={{repo}}> {{repo}}</li>
                     </ul>
                 </div>
-                <div class="chart" style="max-height: 500px; width: 950px; padding-top: 25px;  float: left; position: absolute; left: 220px; top: 25px; z-index: -1">
+                <div class="chart">
                     <pre><code class="language-javascript" style="white-space: pre">{{vm.chartContent}}</code></pre>
                 </div>
         </div>

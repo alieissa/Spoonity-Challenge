@@ -428,6 +428,10 @@ function aeRepos($routeParams, repoService) {
     function controllerFn($timeout) {
 
         var vm = this;
+
+        vm.changeRepo = function () {
+            console.log('Change Repo');
+        };
         vm.setLang = function (lang) {
             console.log(lang);
 
@@ -444,9 +448,9 @@ function aeRepos($routeParams, repoService) {
             return repoService.getLanguages(repos[0]);
         }).then(function (result) {
             return vm.languages = result.data.languages;
-        }).then(function (languages) {
-            return repoService.getLanguageContent(vm.repos[0], 'JavaScript');
-        }).then(function (content) {
+        })
+        // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
+        .then(function (content) {
             vm.chartContent = window.atob(content[0]);
             // console.log(vm.chartContent);
         }).catch(function (err) {

@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <title> Code as Art</title>
-        <link rel="stylesheet" href="bower_components/prism/prism.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="bower_components/prism/prism.css">
         <style media="screen">
             body {
                 margin-top: 0px
@@ -26,17 +26,30 @@
                 height: 33px;
                 padding: 8px
             }
-            code[class*="language-"], pre[class*="language-"] {
-                line-height: 1.2
-            }
+            /*code[class*="language-"], pre[class*="language-"] {
+                line-height: 1.5
+            }*/
 
             .active-repo {
                 border-right: 1px solid grey
             }
+            .chart {
+                position: absolute;
+                top: 25px;
+                left: 220px;
+                background-color: white;
+                max-height: 500px;
+                width: 950px;
+                padding-top: 25px;
+                float: left;
+                z-index: -1;
+            }
         </style>
     </head>
     <body ng-app="spoonityApp">
-        <div ng-view></div>
+
+            <div ng-view></div>
+
     </body>
 
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
