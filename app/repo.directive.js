@@ -8,7 +8,6 @@ function aeRepo($routeParams, repoService) {
         templateUrl: '<li></li>',
         restrict: 'E',
         transclude: true,
-        require: '^repos',
         controllerAs: 'repo',
         controller: controllerFn,
         link: linkFn

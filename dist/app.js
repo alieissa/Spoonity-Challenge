@@ -23,19 +23,13 @@ angular.module('spoonityApp', ['ngRoute']).config(config).constant('HTTP', {
 
 function config($routeProvider) {
 
-    // $routeProvider.when('/', {
-    //     template: '<ae-chart> </ae-chart>'
-    // })
     $routeProvider.when('/', {
-        template: '<ae-repos></ae-repos>'
-    }).when('/tabs', {
-        templateUrl: '/tabs.html'
+        template: '<ae-user> </ae-user>'
     })
+    // $routeProvider.when('/', {
+    //     template: '<ae-repos></ae-repos>'
+    // })
 
-    // List repos for user
-    .when('/users/:username/repos', {
-        template: '<ae-repos>\n                        <ae-repo ng-repeat="repo in vm.repos"></ae-repo>\n                    </ae-repos>'
-    })
 
     //List langs for repo
     .when('/:repo/languages', {
@@ -141,7 +135,6 @@ function aeRepo($routeParams, repoService) {
         templateUrl: '<li></li>',
         restrict: 'E',
         transclude: true,
-        require: '^repos',
         controllerAs: 'repo',
         controller: controllerFn,
         link: linkFn
@@ -425,40 +418,43 @@ function aeRepos($routeParams, repoService) {
 
     return aeRepos_;
 
-    function controllerFn($timeout) {
+    function controllerFn() {
 
         var vm = this;
+
+        vm.chartContent = '';
 
         vm.changeRepo = function () {
             console.log('Change Repo');
         };
+
         vm.setLang = function (lang) {
             console.log(lang);
 
             repoService.getLanguageContent(vm.repos[0], lang).then(function (content) {
-                console.log(content);
                 vm.chartContent = window.atob(content[0]);
-                console.log(window.atob(content[0]));
             });
         };
 
-        repoService.getAllRepos('alieissa').then(function (repos) {
-            return vm.repos = repos;
-        }).then(function (repos) {
-            return repoService.getLanguages(repos[0]);
-        }).then(function (result) {
-            return vm.languages = result.data.languages;
-        })
-        // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
-        .then(function (content) {
-            vm.chartContent = window.atob(content[0]);
-            // console.log(vm.chartContent);
-        }).catch(function (err) {
-            return vm.err = err;
-        });
+        function init(username) {
+            repoService.getAllRepos(username).then(function (repos) {
+                return repoService.getLanguages(repos[0]);
+            }).then(function (result) {
+                return vm.languages = result.data.languages;
+            })
+            // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
+            // .then(content => {
+            //     vm.chartContent = window.atob(content[0]);
+            // })
+            .catch(function (err) {
+                return vm.err = err;
+            });
+        }
     }
 
-    function linkFn(scope, element, attrs) {}
+    function linkFn(scope, element, attrs) {
+        console.log(scope.vm);
+    }
 }
 
 exports.aeRepos = aeRepos;

@@ -25,22 +25,13 @@ angular.module('spoonityApp', ['ngRoute'])
 
 function config($routeProvider) {
 
-    // $routeProvider.when('/', {
-    //     template: '<ae-chart> </ae-chart>'
-    // })
     $routeProvider.when('/', {
-        template: '<ae-repos></ae-repos>'
+        template: '<ae-user> </ae-user>'
     })
-    .when('/tabs', {
-        templateUrl: '/tabs.html'
-    })
+    // $routeProvider.when('/', {
+    //     template: '<ae-repos></ae-repos>'
+    // })
 
-    // List repos for user
-    .when('/users/:username/repos', {
-        template: `<ae-repos>
-                        <ae-repo ng-repeat="repo in vm.repos"></ae-repo>
-                    </ae-repos>`
-    })
 
     //List langs for repo
     .when('/:repo/languages', {

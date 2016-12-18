@@ -1,12 +1,12 @@
 'use strict';
 
-aeRepos.$inject = ['$routeParams', 'repoService'];
+aeUser.$inject = ['$routeParams', 'repoService'];
 
-// function aeRepos($routeParams, repoService) {
-function aeRepos($routeParams, repoService) {
+// function aeUser($routeParams, repoService) {
+function aeUser($routeParams, repoService) {
 
-    let aeRepos_ = {
-        templateUrl: 'repos.html',
+    let aeUser_ = {
+        templateUrl: 'user.html',
         restrict: 'E',
         transclude: true,
         controllerAs: 'vm',
@@ -14,7 +14,7 @@ function aeRepos($routeParams, repoService) {
         link: linkFn
     };
 
-    return aeRepos_;
+    return aeUser_;
 
     function controllerFn() {
 
@@ -26,6 +26,9 @@ function aeRepos($routeParams, repoService) {
             console.log('Change Repo');
         }
 
+
+        vm.changeUser = init;
+
         vm.setLang = (lang) => {
             console.log(lang);
 
@@ -35,9 +38,11 @@ function aeRepos($routeParams, repoService) {
                 });
         };
 
+        init('alieissa');
 
         function init(username) {
             repoService.getAllRepos(username)
+                .then(repos => vm.repos = repos)
                 .then(repos => repoService.getLanguages(repos[0]))
                 .then(result => vm.languages = result.data.languages)
                 // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
@@ -54,4 +59,4 @@ function aeRepos($routeParams, repoService) {
     }
 }
 
-export {aeRepos};
+export {aeUser};
