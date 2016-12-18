@@ -10,37 +10,60 @@
         </style>
     </head>
     <body>
-        <div class="">
-            <div style="width: 200px; float:left">
-                <ul>
-                    <li ng-repeat="repo in vm.repos"> {{repo}}</li>
-                    <!-- <li> Repo 2</li>
-                    <li> Repo 3</li>
-                    <li> Repo 4</li> -->
+        <div style="float:left; width: 400px">
+
+            <div style="width: 100%; height: 100%; background-color: grey">
+                <div class="">
+                    Repos
+                </div>
+                <ul style="list-style: none">
+                    <li>Repo 1</li>
+                    <li>Repo 2</li>
+                    <li>Repo 3</li>
+                    <li>Repo 4</li>
+                    <li>Repo 5</li>
                 </ul>
-            </div>
-            <div style="width: 200px; float:left">
-                <ul>
-                    <li> Language 1</li>
-                    <li> Language 2</li>
-                    <li> Language 3</li>
-                    <li> Language 4</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="" style="width: 200px; height: 100%; float: left">
-
-            <header style="height:56px; width: 702px">
-                <input type="text" ng-model = "search" name="" value="alieissa" >
-                <a ng-href="#/users/{{search}}/repos"> Click Me</a>
-            </header>
-
-            <div>
-                <div class="" style="border: 1px solid blue; width: 700px; height: 500px; float:left">
+                <div class="">
 
                 </div>
+                <div class="">
+                    <div class="">
+                        Languages
+                    </div>
+                    <ul>
+                        <li>language 1</li>
+                        <li>Language 2</li>
+                        <li>Language 3</li>
+                        <li>Language 4</li>
+                    </ul>
+                </div>
+                <!-- <div ng-repeat="lang in vm.languages" class="repo-tab" id={{lang}} ng-click="vm.setLang(lang)"> {{lang|uppercase}}</div> -->
+                <!-- <div ng-repeat="repo in vm.repos" class="repo-tab" id={{repo}}name="button"> {{repo|uppercase}}</div> -->
+                <!-- <ul style="width: 100%; overflow-x: scroll; height: 56px; white-space: nowrap"> -->
+                <!-- </ul> -->
             </div>
         </div>
+
+        <!-- <div style="width: 1000px; height: 500px">
+
+
+
+                <div style="float:left; height: 100%; ">
+                    <form>
+                        <input type="text" name="" value="">
+                    </form>
+                    <ul style="height: 100%">
+
+                        <li ng-repeat="repo in vm.repos" id={{repo}}> {{repo}}</li>
+                    </ul>
+                </div>
+                <div class="chart" style="max-height: 500px; width: 950px; padding-top: 25px; overflow: scroll; float: left; position: absolute; left: 170px; top: 70px">
+                    <pre><code class="language-javascript" style="white-space: pre">{{vm.chartContent}}</code></pre>
+                </div>
+        </div> -->
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/angular/angular.min.js"></script>
+        <script src="bower_components/angular-route/angular-route.min.js"></script>
+        <script src="bower_components/prism/prism.js"></script>
     </body>
 </html>

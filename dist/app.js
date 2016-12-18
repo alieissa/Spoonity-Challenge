@@ -13,9 +13,13 @@ var _reposController = require('./repos.controller.js');
 
 var _repo = require('./repo.service');
 
+var _settingsDirective = require('./settings.directive.js');
+
+console.log(_settingsDirective.aeSettings);
+
 angular.module('spoonityApp', ['ngRoute']).config(config).constant('HTTP', {
     baseUrl: 'https://api.github.com'
-}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeRepos', _reposDirective.aeRepos).directive('aeRepo', _repoDirective.aeRepo).factory('repoService', _repo.repoService);
+}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeSettings', _settingsDirective.aeSettings).directive('aeRepos', _reposDirective.aeRepos).directive('aeRepo', _repoDirective.aeRepo).factory('repoService', _repo.repoService);
 
 function config($routeProvider) {
 
@@ -24,6 +28,8 @@ function config($routeProvider) {
     // })
     $routeProvider.when('/', {
         template: '<ae-repos></ae-repos>'
+    }).when('/tabs', {
+        templateUrl: '/tabs.html'
     })
 
     // List repos for user
@@ -45,7 +51,7 @@ function mainCtrl($rootScope) {
     });
 }
 
-},{"./chart.directive.js":2,"./languages.directive.js":3,"./repo.directive.js":4,"./repo.service":5,"./repos.controller.js":6,"./repos.directive.js":7}],2:[function(require,module,exports){
+},{"./chart.directive.js":2,"./languages.directive.js":3,"./repo.directive.js":4,"./repo.service":5,"./repos.controller.js":6,"./repos.directive.js":7,"./settings.directive.js":8}],2:[function(require,module,exports){
 'use strict';
 
 // aeChart.$inject = ['reposService'];
@@ -452,5 +458,41 @@ function aeRepos($routeParams, repoService) {
 }
 
 exports.aeRepos = aeRepos;
+
+},{}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+aeSettings.$inject = ['repoService'];
+
+function aeSettings(repoService) {
+
+    var aeSettings_ = {
+        templateUrl: 'settings.html',
+        scope: { settings: "=" },
+        controller: controllerFn,
+        controllerAs: 'settings',
+        link: linkFn
+    };
+
+    return aeSettings_;
+
+    function controllerFn() {}
+
+    function linkFn(scope, element, attrs) {
+        // let _form = element.find('form')
+        // console.log(element.find('i'))
+        // console.log(element.find('.settings'))
+        element.find('i').on('click', function () {
+            var _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
+            console.log(_display);
+            element.find('form').css('display', _display);
+        });
+    }
+}
+
+exports.aeSettings = aeSettings;
 
 },{}]},{},[1]);

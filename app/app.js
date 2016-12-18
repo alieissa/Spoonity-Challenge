@@ -6,6 +6,9 @@ import {aeRepos} from './repos.directive.js';
 import {aeRepo} from './repo.directive.js';
 import {repoCtrl} from './repos.controller.js';
 import {repoService} from './repo.service';
+import {aeSettings} from './settings.directive.js';
+
+console.log(aeSettings);
 
 angular.module('spoonityApp', ['ngRoute'])
     .config(config)
@@ -15,6 +18,7 @@ angular.module('spoonityApp', ['ngRoute'])
     .controller('mainCtrl', mainCtrl)
     .directive('aeChart', aeChart)
     .directive('aeLanguages', aeLanguages)
+    .directive('aeSettings', aeSettings)
     .directive('aeRepos', aeRepos)
     .directive('aeRepo', aeRepo)
     .factory('repoService', repoService);
@@ -26,6 +30,9 @@ function config($routeProvider) {
     // })
     $routeProvider.when('/', {
         template: '<ae-repos></ae-repos>'
+    })
+    .when('/tabs', {
+        templateUrl: '/tabs.html'
     })
 
     // List repos for user

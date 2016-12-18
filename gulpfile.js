@@ -8,7 +8,7 @@ const shell         = require('shelljs');
 const source        = require('vinyl-source-stream');
 
 // command line argument check
-const dest = process.argv[3] === '--development' ? 'dist' : 'www';
+const dest = process.argv[3] === '--production' ? 'www' : 'dist';
 const destRoot = path.join(__dirname, dest);
 const sourceRoot = path.join(__dirname, 'app');
 
@@ -33,7 +33,7 @@ gulp.task('default', gulp.series('build'));
 //------------------------------------------------------------------------------
 
 function build(done) {
-    gulp.watch(['app/*.html', 'assets/css/*', '*.js'], gulp.series(...buildTasks));
+    gulp.watch(['app/*', 'assets/css/*', '*.js'], gulp.series(...buildTasks));
     done();
 }
 
