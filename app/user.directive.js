@@ -1,9 +1,8 @@
 'use strict';
 
-aeUser.$inject = ['$routeParams', 'repoService'];
+aeUser.$inject = ['repoService'];
 
-// function aeUser($routeParams, repoService) {
-function aeUser($routeParams, repoService) {
+function aeUser(repoService) {
 
     let aeUser_ = {
         templateUrl: 'user.html',
@@ -21,41 +20,53 @@ function aeUser($routeParams, repoService) {
         let vm = this;
 
         vm.chartContent = '';
+        vm.languages = '';
+        vm.repo = '';
+        vm.repos = [];
+        vm.username = 'alieissa';
 
-        vm.changeRepo = () => {
-            console.log('Change Repo');
-        }
-
-
-        vm.changeUser = init;
-
-        vm.setLang = (lang) => {
-            console.log(lang);
-
-            repoService.getLanguageContent(vm.repos[0], lang)
+        vm.changeLang = lang => {
+            repoService.getLanguageContent(vm.username, vm.repo, lang)
                 .then(content => {
+                    // console.log(lang);
+                    // console.log(content);
                     vm.chartContent = window.atob(content[0]);
+                })
+                .catch(err => {
+                    console.log('Error');
+                    console.log(err);
                 });
         };
 
-        init('alieissa');
+        vm.changeRepo = repo => {
+            vm.repo = repo;
+
+            repoService.getLanguages(repo)
+                .then(result => vm.languages = result.data)
+                .then(languages => {
+                    vm.changeLang(languages.mainLanguage);
+                });
+        };
+
+        vm.changeUser = username => {
+            vm.username = username;
+            init(vm.username);
+        };
+
+        init(vm.username);
 
         function init(username) {
+            console.log(username);
             repoService.getAllRepos(username)
                 .then(repos => vm.repos = repos)
-                .then(repos => repoService.getLanguages(repos[0]))
-                .then(result => vm.languages = result.data.languages)
-                // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
-                // .then(content => {
-                //     vm.chartContent = window.atob(content[0]);
-                // })
-                .catch(err => vm.err = err);
+                .then(repos => vm.changeRepo(repos[0]));
         }
 
     }
 
-    function linkFn(scope, element, attrs) {
-        console.log(scope.vm);
+    function linkFn() {
+        // console.log(scope.vm);
+        // console.log(attrs);
     }
 }
 

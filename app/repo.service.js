@@ -7,13 +7,16 @@ const ABBRS = {
     JavaScript: 'js',
     Ruby: 'rb',
     Python: 'py',
-    TypeScript: 'ts'
+    TypeScript: 'ts',
+    YAML: 'yml',
+    JSON: 'json',
+    PHP: 'php'
 };
 
-const SETTINGS = {
+let Settings = {
     languages: Object.keys(ABBRS),
-    appFolder: 'app',
-    fileNumber: 5
+    folders: ['assets', 'app', 'scripts']
+    // fileNumber: 5
 };
 
 repoService.$inject = ['$q', '$http', 'HTTP'];
@@ -21,18 +24,21 @@ repoService.$inject = ['$q', '$http', 'HTTP'];
 function repoService($q, $http, HTTP) {
     let id = '9accafccc779c70328cb';
     let secret = '993aa0ea792d394457d2cc130b0912b4f690a31b';
-    let repoData, content_urls;
+    let repoData;
     let _currentRepo_;
-    let languages_;
+    // let languages_;
     let contentInfo_ = [];
 
+    function updateSettings(appFolder, langs) {
+        Settings.languages = languages;
+        Settings.folders = appfolders.split(',');
+    }
     // Gets Repo information for user
     function getAllRepos(username) {
         let defer_ = $q.defer();
 
         let _handleRes = result => {
             repoData = result.data;
-            // let repos_ = repoData.map(repo => repo.name);
             defer_.resolve(repoData.map(repo => repo.name));
         };
 
@@ -40,60 +46,52 @@ function repoService($q, $http, HTTP) {
             .then(_handleRes, (err) => {
                 console.log(err);
                 defer_.reject(err);
-        });
+            });
         return defer_.promise;
     }
 
+    function getLanguageContent(username, repoName, language) {
+        // let defer_ = $q.defer();
 
-    function getLanguageContent(repoName, language) {
-        let defer_ = $q.defer();
+        [_currentRepo_] = repoData.filter(repo => repo.name === repoName);
 
-        [_currentRepo_] = repoData.filter(repo => repo.name === repoName)
-
-        if(_currentRepo_.languages[language].length > 0) {
-            console.log('Lang length is larger than 0');
-            defer_.resolve(_currentRepo_.languages[language]);
-            return defer_.promise;
-        }
-
-        console.log('Length is 0');
-
-        let _language = _currentRepo_.language;
         let findLang = blob => {
+
             let _lang = blob.path.split('.').pop();
             return _lang === ABBRS[language];
-        }
+        };
 
-        return $http.get(`${HTTP.baseUrl}/repos/alieissa/${repoName}/contents/?client_id=${id}&client_secret=${secret}`)
+        let _getDirFiles = (appSeg, contentFiles) => {
+            return $http.get(`${appSeg.git_url}?recursive=3&client_id=${id}&client_secret=${secret}`)
+                .then(result => result.data.tree)
+                .then(files => contentFiles = [...files, ...contentFiles]);
+
+        };
+
+        return $http.get(`${HTTP.baseUrl}/repos/${username}/${repoName}/contents/?client_id=${id}&client_secret=${secret}`)
+
             // 1) Get files and main folder 'app'
-            .then((result) => {
+            .then(result => {
+                let _appSeg = result.data.filter(seg => Settings.folders.includes(seg.name));
+                // let _appSeg = result.data.filter(seg => seg.name === Settings.folders);
                 contentInfo_ = result.data.filter(seg => seg.type === 'file');
-                return result.data.filter(seg => seg.name === SETTINGS.appFolder) [0];
-            })
-
-            // 2) Get main folder files recursively
-            .then(appSeg => {
-                return $http.get(`${appSeg.git_url}?recursive=3&client_id=${id}&client_secret=${secret}`);
-            })
-
-            // 3) Parse files form http result
-            .then(result => result.data.tree)
-
-            // 4) Save main folder files to files from 1)
-            .then(blobs => {
-                contentInfo_ = [...contentInfo_, ...blobs];
-                _currentRepo_.blob_urls = contentInfo_;
-                return _currentRepo_.blob_urls
+                // console.log(contentInfo_);
+                if(_appSeg.length > 0) {
+                    return _getDirFiles(_appSeg[0], contentInfo_);
+                }
+                else {
+                    return contentInfo_;
+                }
             })
             .then(blobs => {
                 return blobs.filter(blob => blob.path.indexOf('.') !== -1)
-                    .filter(findLang)
+                    .filter(findLang);
             })
             .then(langBlobs => {
                 return langBlobs.slice(0, 5).map(langBlob => {
-                    let _sep = langBlob.url.indexOf('?') === -1 ? '?' : '&'
+                    let _sep = langBlob.url.indexOf('?') === -1 ? '?' : '&';
                     return $http.get(`${langBlob.url}${_sep}client_id=${id}&client_secret=${secret}`);
-                })
+                });
             })
             .then(promises => $q.all(promises))
             .then(contents => {
@@ -101,7 +99,6 @@ function repoService($q, $http, HTTP) {
                 return _currentRepo_.languages[language];
             });
     }
-
 
     // Returns languages from for repo from repo information
     function getLanguages(repoName) {
@@ -122,56 +119,21 @@ function repoService($q, $http, HTTP) {
 
             // Set-up language arrays for repo
             .then(languages => {
-                languages.filter(lang => SETTINGS.languages.includes(lang)).map(language => repo_.languages[language] = []);
-                return languages.filter(lang => SETTINGS.languages.includes(lang));
+                repo_.languages = languages.filter(lang => Settings.languages.includes(lang));
+                return repo_.languages;
             })
             .then(languages => {
                 return {
                     input: repoName,
                     data: {
-                            mainLanguage: repo_.language,
-                            languages: languages
+                        mainLanguage: repo_.language,
+                        languages: languages
                     }
                 };
             });
     }
 
-    // function getLanguagesContentsUrls(repoName) {
-    //     let defer_ = $q.defer();
-    //     let _promises = [];
-    //
-    //     let _repo = repoData.filter(repo => repo.name === repoName);
-    //     let _language = _repo.language;
-    //
-    //     let _getUrlsRecursively = seg => {
-    //
-    //         let _handleRes = (result) => {
-    //             defer_.resolve(result.data.tree.filter(datum => datum.type === 'blob'));
-    //         };
-    //
-    //         $http.get(`${seg.git_url}?recursive=3&client_id=${id}&client_secret=${secret}`)
-    //                 .then(_handleRes, err => console.log(err));
-    //     };
-    //
-    //     let _handleRes = result => {
-    //
-    //         result.data.forEach(seg => {
-    //             if(seg.type === 'file') {
-    //                 contentInfo_.push(seg);
-    //             }
-    //             else if(seg.name === 'app') {
-    //                 _getUrlsRecursively(seg);
-    //             }
-    //         });
-    //     };
-    //
-    //     $http.get(`${HTTP.baseUrl}/repos/alieissa/${repoName}/contents/?client_id=${id}&client_secret=${secret}`)
-    //         .then( _handleRes, err => console.log(err));
-    //
-    //     return defer_.promise;
-    // }
-
-    return {getAllRepos, getLanguages, getLanguageContent};
+    return {getAllRepos, getLanguages, getLanguageContent, updateSettings};
 }
 
 export {repoService};

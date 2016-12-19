@@ -7,6 +7,8 @@ var _languagesDirective = require('./languages.directive.js');
 
 var _reposDirective = require('./repos.directive.js');
 
+var _userDirective = require('./user.directive.js');
+
 var _repoDirective = require('./repo.directive.js');
 
 var _reposController = require('./repos.controller.js');
@@ -15,16 +17,14 @@ var _repo = require('./repo.service');
 
 var _settingsDirective = require('./settings.directive.js');
 
-console.log(_settingsDirective.aeSettings);
-
 angular.module('spoonityApp', ['ngRoute']).config(config).constant('HTTP', {
     baseUrl: 'https://api.github.com'
-}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeSettings', _settingsDirective.aeSettings).directive('aeRepos', _reposDirective.aeRepos).directive('aeRepo', _repoDirective.aeRepo).factory('repoService', _repo.repoService);
+}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeSettings', _settingsDirective.aeSettings).directive('aeRepos', _reposDirective.aeRepos).directive('aeRepo', _repoDirective.aeRepo).directive('aeUser', _userDirective.aeUser).factory('repoService', _repo.repoService);
 
 function config($routeProvider) {
 
     $routeProvider.when('/', {
-        template: '<ae-user> </ae-user>'
+        template: '<ae-user></ae-user>'
     })
     // $routeProvider.when('/', {
     //     template: '<ae-repos></ae-repos>'
@@ -45,7 +45,7 @@ function mainCtrl($rootScope) {
     });
 }
 
-},{"./chart.directive.js":2,"./languages.directive.js":3,"./repo.directive.js":4,"./repo.service":5,"./repos.controller.js":6,"./repos.directive.js":7,"./settings.directive.js":8}],2:[function(require,module,exports){
+},{"./chart.directive.js":2,"./languages.directive.js":3,"./repo.directive.js":4,"./repo.service":5,"./repos.controller.js":6,"./repos.directive.js":7,"./settings.directive.js":8,"./user.directive.js":9}],2:[function(require,module,exports){
 'use strict';
 
 // aeChart.$inject = ['reposService'];
@@ -181,13 +181,16 @@ var ABBRS = {
     JavaScript: 'js',
     Ruby: 'rb',
     Python: 'py',
-    TypeScript: 'ts'
+    TypeScript: 'ts',
+    YAML: 'yml',
+    JSON: 'json',
+    PHP: 'php'
 };
 
-var SETTINGS = {
+var Settings = {
     languages: Object.keys(ABBRS),
-    appFolder: 'app',
-    fileNumber: 5
+    folders: ['assets', 'app', 'scripts']
+    // fileNumber: 5
 };
 
 repoService.$inject = ['$q', '$http', 'HTTP'];
@@ -195,19 +198,21 @@ repoService.$inject = ['$q', '$http', 'HTTP'];
 function repoService($q, $http, HTTP) {
     var id = '9accafccc779c70328cb';
     var secret = '993aa0ea792d394457d2cc130b0912b4f690a31b';
-    var repoData = void 0,
-        content_urls = void 0;
+    var repoData = void 0;
     var _currentRepo_ = void 0;
-    var languages_ = void 0;
+    // let languages_;
     var contentInfo_ = [];
 
+    function updateSettings(appFolder, langs) {
+        Settings.languages = languages;
+        Settings.folders = appfolders.split(',');
+    }
     // Gets Repo information for user
     function getAllRepos(username) {
         var defer_ = $q.defer();
 
         var _handleRes = function _handleRes(result) {
             repoData = result.data;
-            // let repos_ = repoData.map(repo => repo.name);
             defer_.resolve(repoData.map(function (repo) {
                 return repo.name;
             }));
@@ -220,58 +225,48 @@ function repoService($q, $http, HTTP) {
         return defer_.promise;
     }
 
-    function getLanguageContent(repoName, language) {
-        var defer_ = $q.defer();
-
+    function getLanguageContent(username, repoName, language) {
         var _repoData$filter = repoData.filter(function (repo) {
             return repo.name === repoName;
         });
+        // let defer_ = $q.defer();
 
         var _repoData$filter2 = _slicedToArray(_repoData$filter, 1);
 
         _currentRepo_ = _repoData$filter2[0];
 
 
-        if (_currentRepo_.languages[language].length > 0) {
-            console.log('Lang length is larger than 0');
-            defer_.resolve(_currentRepo_.languages[language]);
-            return defer_.promise;
-        }
-
-        console.log('Length is 0');
-
-        var _language = _currentRepo_.language;
         var findLang = function findLang(blob) {
+
             var _lang = blob.path.split('.').pop();
             return _lang === ABBRS[language];
         };
 
-        return $http.get(HTTP.baseUrl + '/repos/alieissa/' + repoName + '/contents/?client_id=' + id + '&client_secret=' + secret)
+        var _getDirFiles = function _getDirFiles(appSeg, contentFiles) {
+            return $http.get(appSeg.git_url + '?recursive=3&client_id=' + id + '&client_secret=' + secret).then(function (result) {
+                return result.data.tree;
+            }).then(function (files) {
+                return contentFiles = [].concat(_toConsumableArray(files), _toConsumableArray(contentFiles));
+            });
+        };
+
+        return $http.get(HTTP.baseUrl + '/repos/' + username + '/' + repoName + '/contents/?client_id=' + id + '&client_secret=' + secret)
+
         // 1) Get files and main folder 'app'
         .then(function (result) {
+            var _appSeg = result.data.filter(function (seg) {
+                return Settings.folders.includes(seg.name);
+            });
+            // let _appSeg = result.data.filter(seg => seg.name === Settings.folders);
             contentInfo_ = result.data.filter(function (seg) {
                 return seg.type === 'file';
             });
-            return result.data.filter(function (seg) {
-                return seg.name === SETTINGS.appFolder;
-            })[0];
-        })
-
-        // 2) Get main folder files recursively
-        .then(function (appSeg) {
-            return $http.get(appSeg.git_url + '?recursive=3&client_id=' + id + '&client_secret=' + secret);
-        })
-
-        // 3) Parse files form http result
-        .then(function (result) {
-            return result.data.tree;
-        })
-
-        // 4) Save main folder files to files from 1)
-        .then(function (blobs) {
-            contentInfo_ = [].concat(_toConsumableArray(contentInfo_), _toConsumableArray(blobs));
-            _currentRepo_.blob_urls = contentInfo_;
-            return _currentRepo_.blob_urls;
+            // console.log(contentInfo_);
+            if (_appSeg.length > 0) {
+                return _getDirFiles(_appSeg[0], contentInfo_);
+            } else {
+                return contentInfo_;
+            }
         }).then(function (blobs) {
             return blobs.filter(function (blob) {
                 return blob.path.indexOf('.') !== -1;
@@ -316,14 +311,10 @@ function repoService($q, $http, HTTP) {
 
         // Set-up language arrays for repo
         .then(function (languages) {
-            languages.filter(function (lang) {
-                return SETTINGS.languages.includes(lang);
-            }).map(function (language) {
-                return repo_.languages[language] = [];
+            repo_.languages = languages.filter(function (lang) {
+                return Settings.languages.includes(lang);
             });
-            return languages.filter(function (lang) {
-                return SETTINGS.languages.includes(lang);
-            });
+            return repo_.languages;
         }).then(function (languages) {
             return {
                 input: repoName,
@@ -335,42 +326,7 @@ function repoService($q, $http, HTTP) {
         });
     }
 
-    // function getLanguagesContentsUrls(repoName) {
-    //     let defer_ = $q.defer();
-    //     let _promises = [];
-    //
-    //     let _repo = repoData.filter(repo => repo.name === repoName);
-    //     let _language = _repo.language;
-    //
-    //     let _getUrlsRecursively = seg => {
-    //
-    //         let _handleRes = (result) => {
-    //             defer_.resolve(result.data.tree.filter(datum => datum.type === 'blob'));
-    //         };
-    //
-    //         $http.get(`${seg.git_url}?recursive=3&client_id=${id}&client_secret=${secret}`)
-    //                 .then(_handleRes, err => console.log(err));
-    //     };
-    //
-    //     let _handleRes = result => {
-    //
-    //         result.data.forEach(seg => {
-    //             if(seg.type === 'file') {
-    //                 contentInfo_.push(seg);
-    //             }
-    //             else if(seg.name === 'app') {
-    //                 _getUrlsRecursively(seg);
-    //             }
-    //         });
-    //     };
-    //
-    //     $http.get(`${HTTP.baseUrl}/repos/alieissa/${repoName}/contents/?client_id=${id}&client_secret=${secret}`)
-    //         .then( _handleRes, err => console.log(err));
-    //
-    //     return defer_.promise;
-    // }
-
-    return { getAllRepos: getAllRepos, getLanguages: getLanguages, getLanguageContent: getLanguageContent };
+    return { getAllRepos: getAllRepos, getLanguages: getLanguages, getLanguageContent: getLanguageContent, updateSettings: updateSettings };
 }
 
 exports.repoService = repoService;
@@ -404,13 +360,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 aeRepos.$inject = ['$routeParams', 'repoService'];
 
-// function aeRepos($routeParams, repoService) {
 function aeRepos($routeParams, repoService) {
 
     var aeRepos_ = {
         templateUrl: 'repos.html',
         restrict: 'E',
-        transclude: true,
         controllerAs: 'vm',
         controller: controllerFn,
         link: linkFn
@@ -423,29 +377,34 @@ function aeRepos($routeParams, repoService) {
         var vm = this;
 
         vm.chartContent = '';
+        vm.languages = '';
+        vm.repo = '';
 
-        vm.changeRepo = function () {
-            console.log('Change Repo');
-        };
-
-        vm.setLang = function (lang) {
+        vm.changeLang = function (lang) {
             console.log(lang);
 
-            repoService.getLanguageContent(vm.repos[0], lang).then(function (content) {
-                vm.chartContent = window.atob(content[0]);
+            repoService.getLanguageContent(vm.repo, lang).then(function (content) {
+                return vm.chartContent = window.atob(content[0]);
             });
         };
 
+        vm.changeRepo = function (repo) {
+            // console.log(repo);
+
+            repoService.getLanguages(repo).then(function (result) {
+                return vm.languages = result.data;
+            }).then(function (languages) {
+                return vm.changeLang(languages.mainLanguage);
+            });
+        };
+
+        init('alieissa');
+
         function init(username) {
             repoService.getAllRepos(username).then(function (repos) {
-                return repoService.getLanguages(repos[0]);
-            }).then(function (result) {
-                return vm.languages = result.data.languages;
+                return vm.changeRepo(repos[0]);
             })
-            // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
-            // .then(content => {
-            //     vm.chartContent = window.atob(content[0]);
-            // })
+            // .then(result => vm.languages = result.data.languages)
             .catch(function (err) {
                 return vm.err = err;
             });
@@ -454,6 +413,7 @@ function aeRepos($routeParams, repoService) {
 
     function linkFn(scope, element, attrs) {
         console.log(scope.vm);
+        console.log(attrs);
     }
 }
 
@@ -465,13 +425,24 @@ exports.aeRepos = aeRepos;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+var ABBRS = {
+    CoffeScript: 'coffee',
+    HTML: 'html',
+    CSS: 'css',
+    Java: 'java',
+    JavaScript: 'js',
+    PHP: 'php',
+    Python: 'py',
+    Ruby: 'rb',
+    TypeScript: 'ts'
+};
+
 aeSettings.$inject = ['repoService'];
 
 function aeSettings(repoService) {
-
     var aeSettings_ = {
         templateUrl: 'settings.html',
-        scope: { settings: "=" },
+        scope: {},
         controller: controllerFn,
         controllerAs: 'settings',
         link: linkFn
@@ -479,20 +450,115 @@ function aeSettings(repoService) {
 
     return aeSettings_;
 
-    function controllerFn() {}
+    function controllerFn() {
+        var vm = this;
 
-    function linkFn(scope, element, attrs) {
-        // let _form = element.find('form')
-        // console.log(element.find('i'))
-        // console.log(element.find('.settings'))
+        vm.languages = Object.keys(ABBRS);
+
+        // Defaul Settings
+        vm.appFolder = 'app';
+        vm.selectedLanguages = Object.keys(ABBRS);
+
+        vm.updateLangs = function (lang, checked) {
+            if (checked === -1) {
+                vm.selectedLanguages.push(lang);
+            } else {
+                vm.selectedLanguages = vm.selectedLanguages.filter(function (_lang_) {
+                    return _lang_ !== lang;
+                });
+            }
+        };
+
+        vm.updateSettings = function (appFolder, langs) {
+            repoService.updateSettings(appFolder, langs);
+        };
+    }
+
+    function linkFn(scope, element) {
         element.find('i').on('click', function () {
             var _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
-            console.log(_display);
             element.find('form').css('display', _display);
         });
     }
 }
 
 exports.aeSettings = aeSettings;
+
+},{}],9:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+aeUser.$inject = ['repoService'];
+
+function aeUser(repoService) {
+
+    var aeUser_ = {
+        templateUrl: 'user.html',
+        restrict: 'E',
+        transclude: true,
+        controllerAs: 'vm',
+        controller: controllerFn,
+        link: linkFn
+    };
+
+    return aeUser_;
+
+    function controllerFn() {
+
+        var vm = this;
+
+        vm.chartContent = '';
+        vm.languages = '';
+        vm.repo = '';
+        vm.repos = [];
+        vm.username = 'alieissa';
+
+        vm.changeLang = function (lang) {
+            repoService.getLanguageContent(vm.username, vm.repo, lang).then(function (content) {
+                // console.log(lang);
+                // console.log(content);
+                vm.chartContent = window.atob(content[0]);
+            }).catch(function (err) {
+                console.log('Error');
+                console.log(err);
+            });
+        };
+
+        vm.changeRepo = function (repo) {
+            vm.repo = repo;
+
+            repoService.getLanguages(repo).then(function (result) {
+                return vm.languages = result.data;
+            }).then(function (languages) {
+                vm.changeLang(languages.mainLanguage);
+            });
+        };
+
+        vm.changeUser = function (username) {
+            vm.username = username;
+            init(vm.username);
+        };
+
+        init(vm.username);
+
+        function init(username) {
+            console.log(username);
+            repoService.getAllRepos(username).then(function (repos) {
+                return vm.repos = repos;
+            }).then(function (repos) {
+                return vm.changeRepo(repos[0]);
+            });
+        }
+    }
+
+    function linkFn() {
+        // console.log(scope.vm);
+        // console.log(attrs);
+    }
+}
+
+exports.aeUser = aeUser;
 
 },{}]},{},[1]);

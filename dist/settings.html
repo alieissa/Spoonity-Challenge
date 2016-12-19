@@ -1,17 +1,26 @@
 <div style="width: 100px; float: right">
+
     <i class="material-icons">settings</i>
-    <form class="settings" style="display: none">
+    <form class="settings" style="display: none" name="settingsForm"
+        ng-submit="settings.setSettings(settings.appFolder, settings.selectedLanguages)">
+
+        <div ng-show="settingsForm.appFolder.$invalid">
+            <p> Folder name too short</p>
+        </div>
+        <div ng-show="settings.selectedLanguages.length === 0">
+            <p> Must select at least 1 Language</p>
+        </div>
+        <div>{{settingForm.appFolder.$valid}}</div>
+
         <fieldset>
-            <label>App Directory</label>  <input></input>
-            <input type="checkbox" name="animal" value="Cat" />CoffeeScript <br />
-            <input type="checkbox" name="animal" value="Bird" />CSS<br />
-            <input type="checkbox" name="animal" value="Dog" />HTML<br />
-            <input type="checkbox" name="animal" value="Bird" />Java<br />
-            <input type="checkbox" name="animal" value="Cat" />JavaScript <br />
-            <input type="checkbox" name="animal" value="Bird" />Python<br />
-            <input type="checkbox" name="animal" value="Bird" />Ruby<br />
-            <input type="checkbox" name="animal" value="Cat" />TypeScript <br />
-            <input type="submit" styl="float: right" value="OK" style="float: right" />
+            <label>App Directory</label>
+            <input type="text" name="appFolder" value="settings.appFolder" ng-model="settings.appFolder" ng-minlength="3" ng-required="true"></input>
+
+            <label ng-repeat="lang in settings.languages">
+                <input type="checkbox" ng-model="checked" ng-click="settings.updateLangs(lang, ng-checked)" ng-checked="true"/>{{lang}}<br />
+            </label>
+            <input type="submit" styl="float: right" value="OK"
+                    ng-disabled="settingsForm.appFolder.$invalid || settings.selectedLanguages.length === 0"  style="float: right" />
         </fieldset>
     </form>
 </div>

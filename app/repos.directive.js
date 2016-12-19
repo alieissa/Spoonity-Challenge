@@ -2,13 +2,11 @@
 
 aeRepos.$inject = ['$routeParams', 'repoService'];
 
-// function aeRepos($routeParams, repoService) {
 function aeRepos($routeParams, repoService) {
 
     let aeRepos_ = {
         templateUrl: 'repos.html',
         restrict: 'E',
-        transclude: true,
         controllerAs: 'vm',
         controller: controllerFn,
         link: linkFn
@@ -21,29 +19,30 @@ function aeRepos($routeParams, repoService) {
         let vm = this;
 
         vm.chartContent = '';
+        vm.languages = '';
+        vm.repo = '';
 
-        vm.changeRepo = () => {
-            console.log('Change Repo');
-        }
-
-        vm.setLang = (lang) => {
+        vm.changeLang = lang => {
             console.log(lang);
 
-            repoService.getLanguageContent(vm.repos[0], lang)
-                .then(content => {
-                    vm.chartContent = window.atob(content[0]);
-                });
+            repoService.getLanguageContent(vm.repo, lang)
+                .then(content => vm.chartContent = window.atob(content[0]));
         };
 
+        vm.changeRepo = repo => {
+            // console.log(repo);
+
+            repoService.getLanguages(repo)
+                .then(result => vm.languages = result.data)
+                .then(languages => vm.changeLang(languages.mainLanguage));
+        };
+
+        init('alieissa');
 
         function init(username) {
             repoService.getAllRepos(username)
-                .then(repos => repoService.getLanguages(repos[0]))
-                .then(result => vm.languages = result.data.languages)
-                // .then(languages => repoService.getLanguageContent(vm.repos[0], 'JavaScript'))
-                // .then(content => {
-                //     vm.chartContent = window.atob(content[0]);
-                // })
+                .then(repos => vm.changeRepo(repos[0]))
+                // .then(result => vm.languages = result.data.languages)
                 .catch(err => vm.err = err);
         }
 
@@ -51,6 +50,7 @@ function aeRepos($routeParams, repoService) {
 
     function linkFn(scope, element, attrs) {
         console.log(scope.vm);
+        console.log(attrs);
     }
 }
 
