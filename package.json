@@ -2,12 +2,12 @@
   "name": "spoonitychallenge",
   "version": "1.0.0",
   "description": "Spoonity Challenge",
-  "main": "app/app.js",
+  "main": "dist/app.js",
   "scripts": {
     "dev:build": "gulp build",
     "dev:start": "http-server dist/ -p 3000",
     "dev:deploy": "gulp deploy --development",
-    "build": "gulp build",
+    "build": "gulp build"
   },
   "author": "Ali Eissa",
   "license": "ISC",

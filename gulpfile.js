@@ -2,7 +2,7 @@ const babelify      = require('babelify');
 const browserify    = require('browserify');
 const buffer        = require('vinyl-buffer');
 const gulp          = require('gulp');
-const jshint        = require('gulp-jshint');
+// const jshint        = require('gulp-jshint');
 const path          = require('path');
 const shell         = require('shelljs');
 const source        = require('vinyl-source-stream');
@@ -15,14 +15,14 @@ const sourceRoot = path.join(__dirname, 'app');
 const assets = path.join(__dirname, 'assets/css/*');
 const modules = ['favourites', 'routes', 'stops', 'util'];
 
-const buildTasks = ['clean', 'lint', 'es6', 'dist'];
+const buildTasks = ['clean', 'es6', 'dist'];
 
 //------------------------------------------------------------------------------
 // Task registrations
 //------------------------------------------------------------------------------
 
 gulp.task('clean', clean);
-gulp.task('lint', lint);
+// gulp.task('lint', lint);
 gulp.task('es6', es6);
 gulp.task('dist', dist);
 gulp.task('build', gulp.series(...buildTasks, build));
@@ -40,6 +40,7 @@ function build(done) {
 function clean(done) {
     shell.rm('-r', `${dest}/*.js`);
     shell.rm('-r', `${dest}/*.html`);
+    shell.rm('-r', `${dest}/*.css`);
     done();
 }
 
@@ -55,8 +56,8 @@ function es6(done) {
         .transform('babelify', { presets: ['es2015'] })
         .bundle()
         .on('error', function(err) {
-            console.log(err)
-            this.emit("end");
+            console.log(err);
+            this.emit('end');
         })
         .pipe(source('app.js'))
         .pipe(buffer())
@@ -64,14 +65,14 @@ function es6(done) {
     done();
 }
 
-function lint(done) {
-
-    return gulp.src('app/**/*.js')
-        .on('error', function(err) {
-            console.log(err.message);
-            this.emit("end");
-        })
-        .pipe(jshint('.jshintrc'))
-        .pipe(jshint.reporter('jshint-stylish'));
-    done();
-}
+// function lint(done) {
+//
+//     return gulp.src('app/**/*.js')
+//         .on('error', function(err) {
+//             console.log(err.message);
+//             this.emit("end");
+//         })
+//         .pipe(jshint('.jshintrc'))
+//         .pipe(jshint.reporter('jshint-stylish'));
+//     done();
+// }

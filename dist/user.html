@@ -1,0 +1,27 @@
+
+        <div style="float:left; width: 1000px">
+
+            <div class="menu-container">
+
+                <div class="tab-container" >
+                    <div ng-repeat="lang in user.languages" class="repo-tab" id={{lang}}
+                        ng-click="user.changeLang(user.username, user.repo, lang)"> {{lang|uppercase}}</div>
+                </div>
+                <form style="float:left" ng-submit="user.changeUser(username)">
+                    <input type="text" name="" value="" ng-model="username" placeholder="Enter username here">
+                    <input type="submit" style="display: none" />
+                </form>
+                <ae-settings username={{user.username}} ></ae-settings>
+            </div>
+        </div>
+
+        <div style="width: 1000px;">
+            <div class="repo-container">
+                <ul style="height: 100%; margin-top: 0px">
+                    <li ng-repeat="repo in user.repos" id={{repo}} ng-click="user.changeRepo(user.username, repo)"> {{repo}}</li>
+                </ul>
+            </div>
+                <div class="chart">
+                    <pre><code class="language-javascript" style="white-space: pre">{{user.chartContent}}</code></pre>
+                </div>
+        </div>
