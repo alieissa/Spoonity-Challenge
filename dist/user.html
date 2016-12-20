@@ -4,7 +4,8 @@
             <div style="width: 1000px; height: 56px; margin-left: 202px; position: fixed; top: 35px">
 
                 <div class="tab-container" style="float: left; margin-left: 30px; margin-right: 30px;">
-                    <div ng-repeat="lang in vm.languages.languages" class="repo-tab" id={{lang}} ng-click="vm.changeLang(lang)"> {{lang|uppercase}}</div>
+                    <div ng-repeat="lang in vm.languages" class="repo-tab" id={{lang}}
+                        ng-click="vm.changeLang(vm.username, vm.repo, lang)"> {{lang|uppercase}}</div>
                 </div>
                 <form style="float:left" ng-submit="vm.changeUser(username)">
                     <input type="text" name="" value="" ng-model="username" placeholder="Enter username here">
@@ -17,7 +18,7 @@
         <div style="width: 1000px;">
             <div style="float:left; height: 100%; position: fixed; top: 75px">
                 <ul style="height: 100%; margin-top: 0px">
-                    <li ng-repeat="repo in vm.repos" id={{repo}} ng-click="vm.changeRepo(repo)"> {{repo}}</li>
+                    <li ng-repeat="repo in vm.repos" id={{repo}} ng-click="vm.changeRepo(vm.username, repo)"> {{repo}}</li>
                 </ul>
             </div>
                 <div class="chart">

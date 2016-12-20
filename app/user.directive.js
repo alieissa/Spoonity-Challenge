@@ -25,11 +25,10 @@ function aeUser(repoService) {
         vm.repos = [];
         vm.username = 'alieissa';
 
-        vm.changeLang = lang => {
-            repoService.getLanguageContent(vm.username, vm.repo, lang)
+        vm.changeLang = (username, repo, lang) => {
+            console.log(username);
+            repoService.getLanguageContent(username, repo, lang)
                 .then(content => {
-                    // console.log(lang);
-                    // console.log(content);
                     vm.chartContent = window.atob(content[0]);
                 })
                 .catch(err => {
@@ -38,13 +37,13 @@ function aeUser(repoService) {
                 });
         };
 
-        vm.changeRepo = repo => {
+        vm.changeRepo = (username, repo) => {
             vm.repo = repo;
 
-            repoService.getLanguages(repo)
-                .then(result => vm.languages = result.data)
+            repoService.getLanguages(username, repo)
                 .then(languages => {
-                    vm.changeLang(languages.mainLanguage);
+                    vm.languages = languages;
+                    vm.changeLang(username, repo, vm.languages[0]);
                 });
         };
 
@@ -56,10 +55,11 @@ function aeUser(repoService) {
         init(vm.username);
 
         function init(username) {
-            console.log(username);
             repoService.getAllRepos(username)
                 .then(repos => vm.repos = repos)
-                .then(repos => vm.changeRepo(repos[0]));
+                .then(repos => {
+                    return vm.changeRepo(username, repos[0]);
+                });
         }
 
     }
