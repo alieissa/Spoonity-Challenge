@@ -8,7 +8,7 @@ function aeUser(repoService) {
         templateUrl: 'user.html',
         restrict: 'E',
         transclude: true,
-        controllerAs: 'vm',
+        controllerAs: 'user',
         controller: controllerFn,
         link: linkFn
     };

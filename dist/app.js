@@ -220,21 +220,27 @@ function repoService($q, $http, HTTP) {
 
     function getLanguageContent(username, repoName, language) {
 
-        return detectLanguages(username, repoName).then(function (langs) {
+        // Filter for language blobs that are for desired languages
+        var _filterLanguageBlobs = function _filterLanguageBlobs(langs) {
             return langs.filter(function (lang) {
                 var ext = lang.path.split('.').pop();
 
                 return ABBRS[language] === ext;
             });
-        }).then(function (langBlobs) {
+        };
+
+        // Gets the contents of all language blobs from github
+        var _getLanguageBlobContent = function _getLanguageBlobContent(langBlobs) {
             return langBlobs.map(function (langBlob) {
-                // console.log(langBlob.path);
                 var _sep = langBlob.url.indexOf('?') === -1 ? '?' : '&';
                 return $http.get('' + langBlob.url + _sep + 'client_id=' + id + '&client_secret=' + secret);
             });
-        }).then(function (promises) {
+        };
+
+        return detectLanguages(username, repoName).then(_filterLanguageBlobs).then(_getLanguageBlobContent).then(function (promises) {
             return $q.all(promises);
-        }).then(function (contents) {
+        }) // Resolves _getLanguageBlobContent array of promises
+        .then(function (contents) {
             _currentRepo_.languages[language] = contents.map(function (article) {
                 return article.data.content;
             });
@@ -250,8 +256,10 @@ function repoService($q, $http, HTTP) {
             _repoData$filter2 = _slicedToArray(_repoData$filter, 1),
             _repo_ = _repoData$filter2[0];
 
-        var _getLangExtensions = function _getLangExtensions(languages) {
+        //Filters for extensions of repo languages
 
+
+        var _getLangExtensions = function _getLangExtensions(languages) {
             return languages.map(function (language) {
                 var ext = language.path.split('.').pop();
 
@@ -261,32 +269,25 @@ function repoService($q, $http, HTTP) {
             });
         };
 
-        return detectLanguages(username, repoName).then(_getLangExtensions)
-        // .then(languages => {
-        //     return languages.map(language => {
-        //         let ext = language.path.split('.').pop();
-        //
-        //         if(Object.values(ABBRS).includes(ext)) {
-        //             return ext;
-        //         }
-        //     });
-        // })
-        .then(function (extensions) {
-            return new Set(extensions);
-        }) // Get unique values
-        .then(function (uExtensions) {
-            return Array.from(uExtensions).map(function (ext) {
+        // Get the lanugage of each extension
+        var _mapExtensionsToLang = function _mapExtensionsToLang(extensions) {
+            return Array.from(extensions).map(function (ext) {
                 var language_ = Object.keys(ABBRS).filter(function (key) {
                     return ABBRS[key] === ext;
                 })[0];
                 return language_;
             });
-        }).then(function (languages) {
-            _repo_.languages = languages;
-            return languages;
+        };
+
+        return detectLanguages(username, repoName).then(_getLangExtensions).then(function (extensions) {
+            return new Set(extensions);
+        }) // Get unique values
+        .then(_mapExtensionsToLang).then(function (languages) {
+            return _repo_.languages = languages;
         });
     }
 
+    // Detects the languages of user specified folders, i.e. settings.folders
     function detectLanguages() {
         var username = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'alieissa';
         var repoName = arguments[1];
@@ -305,6 +306,7 @@ function repoService($q, $http, HTTP) {
             return Object.values(ABBRS).includes(_lang);
         };
 
+        // Takes a dir and returns an array of promises of all of its files
         var _getDirFiles = function _getDirFiles(dirs) {
             var _promises = dirs.map(function (dir) {
                 return $http.get(dir.git_url + '?recursive=3&client_id=' + id + '&client_secret=' + secret).then(function (result) {
@@ -315,10 +317,8 @@ function repoService($q, $http, HTTP) {
             return $q.all(_promises);
         };
 
-        return $http.get(HTTP.baseUrl + '/repos/' + username + '/' + repoName + '/contents/?client_id=' + id + '&client_secret=' + secret)
-
-        // 1) Get files and main folder 'app'
-        .then(function (result) {
+        // Gets the contents of entire repo
+        var _getAllFiles = function _getAllFiles(result) {
             var appFiles = result.data.filter(function (seg) {
                 return seg.type === 'file';
             });
@@ -328,7 +328,6 @@ function repoService($q, $http, HTTP) {
             //     return Settings.folders.indexOf(seg.name) === -1 && seg.type === 'dir';
             // });
 
-            // Uncomment to filter folder by inclusion
             var _appSeg = result.data.filter(function (seg) {
                 return Settings.folders.includes(seg.name);
             });
@@ -340,15 +339,12 @@ function repoService($q, $http, HTTP) {
             } else {
                 return appFiles;
             }
-        })
+        };
 
-        // Return files with extensions that match lang extensions
-        .then(function (blobs) {
+        return $http.get(HTTP.baseUrl + '/repos/' + username + '/' + repoName + '/contents/?client_id=' + id + '&client_secret=' + secret).then(_getAllFiles).then(function (blobs) {
             return blobs.filter(function (blob) {
                 return blob.path.indexOf('.') !== -1;
             }).filter(_findLang);
-        }).then(function (langs) {
-            return langs;
         });
     }
     function flattenArray(dirFiles) {
@@ -485,9 +481,13 @@ aeSettings.$inject = ['repoService'];
 function aeSettings(repoService) {
     var aeSettings_ = {
         templateUrl: 'settings.html',
-        scope: {},
+        scope: {
+            username: '@',
+            reInit: '&changeUser'
+        },
         controller: controllerFn,
         controllerAs: 'settings',
+        bindToController: true,
         link: linkFn
     };
 
@@ -512,12 +512,13 @@ function aeSettings(repoService) {
             }
         };
 
-        vm.updateSettings = function (appFolder, langs) {
+        vm.updateSettings = function (username, appFolder, langs) {
             repoService.updateSettings(appFolder, langs);
+            console.log(vm.username);
         };
     }
 
-    function linkFn(scope, element) {
+    function linkFn(scope, element, attrs) {
         element.find('i').on('click', function () {
             var _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
             element.find('form').css('display', _display);
@@ -541,7 +542,7 @@ function aeUser(repoService) {
         templateUrl: 'user.html',
         restrict: 'E',
         transclude: true,
-        controllerAs: 'vm',
+        controllerAs: 'user',
         controller: controllerFn,
         link: linkFn
     };

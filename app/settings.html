@@ -2,7 +2,7 @@
 
     <i class="material-icons">settings</i>
     <form class="settings" style="display: none" name="settingsForm"
-        ng-submit="settings.setSettings(settings.appFolder, settings.selectedLanguages)">
+        ng-submit="settings.setSettings(settings.username, settings.appFolder, settings.selectedLanguages)">
 
         <div ng-show="settingsForm.appFolder.$invalid">
             <p> Folder name too short</p>

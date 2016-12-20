@@ -17,9 +17,13 @@ aeSettings.$inject = ['repoService'];
 function aeSettings(repoService) {
     let aeSettings_ = {
         templateUrl: 'settings.html',
-        scope: {},
+        scope: {
+            username: '@',
+            reInit: '&changeUser'
+        },
         controller: controllerFn,
         controllerAs: 'settings',
+        bindToController: true,
         link: linkFn
     };
 
@@ -34,7 +38,6 @@ function aeSettings(repoService) {
         vm.appFolder = 'app';
         vm.selectedLanguages = Object.keys(ABBRS);
 
-
         vm.updateLangs = (lang, checked) => {
             if(checked === -1) {
                 vm.selectedLanguages.push(lang);
@@ -44,12 +47,13 @@ function aeSettings(repoService) {
             }
         };
 
-        vm.updateSettings = (appFolder, langs) => {
+        vm.updateSettings = (username, appFolder, langs) => {
             repoService.updateSettings(appFolder, langs);
+            console.log(vm.username)
         };
     }
 
-    function linkFn(scope, element) {
+    function linkFn(scope, element, attrs) {
         element.find('i').on('click', () => {
             let _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
             element.find('form').css('display', _display);
