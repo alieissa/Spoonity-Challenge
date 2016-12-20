@@ -9,16 +9,15 @@ function aeUser(repoService) {
         restrict: 'E',
         transclude: true,
         controllerAs: 'user',
-        controller: controllerFn,
-        link: linkFn
+        controller: controllerFn
     };
 
     return aeUser_;
 
     function controllerFn() {
-
         let vm = this;
 
+        // Defaults
         vm.chartContent = '';
         vm.languages = '';
         vm.repo = '';
@@ -26,7 +25,6 @@ function aeUser(repoService) {
         vm.username = 'alieissa';
 
         vm.changeLang = (username, repo, lang) => {
-            console.log(username);
             repoService.getLanguageContent(username, repo, lang)
                 .then(content => {
                     vm.chartContent = window.atob(content[0]);
@@ -38,10 +36,14 @@ function aeUser(repoService) {
         };
 
         vm.changeRepo = (username, repo) => {
-            vm.repo = repo;
-
             repoService.getLanguages(username, repo)
                 .then(languages => {
+                    // Dirty workaround
+                    if(languages.length == 0) {
+                        alert(`ERROR: ${repo} does not have any of the desired languages`);
+                        return;
+                    }
+                    vm.repo = repo;
                     vm.languages = languages;
                     vm.changeLang(username, repo, vm.languages[0]);
                 });
@@ -62,11 +64,6 @@ function aeUser(repoService) {
                 });
         }
 
-    }
-
-    function linkFn() {
-        // console.log(scope.vm);
-        // console.log(attrs);
     }
 }
 

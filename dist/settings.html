@@ -2,19 +2,20 @@
 
     <i class="material-icons">settings</i>
     <form class="settings" style="display: none" name="settingsForm"
-        ng-submit="settings.setSettings(settings.username, settings.appFolder, settings.selectedLanguages)">
+        ng-submit="settings.updateSettings(settings.username, settings.appFolders, settings.selectedLanguages)">
 
         <div ng-show="settingsForm.appFolder.$invalid">
             <p> Folder name too short</p>
         </div>
         <div ng-show="settings.selectedLanguages.length === 0">
-            <p> Must select at least 1 Language</p>
+            <p> Must select at least 1 language</p>
         </div>
         <div>{{settingForm.appFolder.$valid}}</div>
 
         <fieldset>
             <label>App Directory</label>
-            <input type="text" name="appFolder" value="settings.appFolder" ng-model="settings.appFolder" ng-minlength="3" ng-required="true"></input>
+            <input type="text" name="appFolder" value="settings.appFolders" ng-model="settings.appFolders"
+                ng-minlength="3" ng-required="true"></input>
 
             <label ng-repeat="lang in settings.languages">
                 <input type="checkbox" ng-model="checked" ng-click="settings.updateLangs(lang, ng-checked)" ng-checked="true"/>{{lang}}<br />

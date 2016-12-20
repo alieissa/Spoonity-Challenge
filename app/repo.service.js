@@ -13,7 +13,7 @@ const ABBRS = {
 };
 
 let Settings = {
-    languages: Object.keys(ABBRS),
+    languages: ABBRS,
     folders: ['app', 'scripts', 'src', 'util']
 };
 
@@ -25,8 +25,9 @@ function repoService($q, $http, HTTP) {
     let repoData;
     let _currentRepo_;
 
-    function updateSettings(appFolder, langs) {
-        Settings.languages = langs;
+    function updateSettings(appFolder, languages) {
+        Settings.languages = {};
+        languages.map(language => Settings.languages[language] = ABBRS[language])
         Settings.folders = appFolder.split(',');
     }
     // Gets Repo information for user
@@ -52,8 +53,7 @@ function repoService($q, $http, HTTP) {
         let _filterLanguageBlobs =  langs => {
             return langs.filter(lang => {
                 let ext = lang.path.split('.').pop();
-
-                return ABBRS[language] === ext;
+                return Settings.languages[language] === ext;
             });
         };
 
@@ -84,7 +84,7 @@ function repoService($q, $http, HTTP) {
             return languages.map(language => {
                 let ext = language.path.split('.').pop();
 
-                if(Object.values(ABBRS).includes(ext)) {
+                if(Object.values(Settings.languages).includes(ext)) {
                     return ext;
                 }
             });
@@ -93,7 +93,7 @@ function repoService($q, $http, HTTP) {
         // Get the lanugage of each extension
         let _mapExtensionsToLang = extensions => {
             return Array.from(extensions).map(ext => {
-                let language_ = Object.keys(ABBRS).filter(key => ABBRS[key] === ext)[0];
+                let language_ = Object.keys(Settings.languages).filter(key => Settings.languages[key] === ext)[0];
                 return language_;
             });
         };
@@ -112,9 +112,8 @@ function repoService($q, $http, HTTP) {
 
         let _findLang = blob => {
             let _lang = blob.path.split('.').pop();
-            return Object.values(ABBRS).includes(_lang);
+            return Object.values(Settings.languages).includes(_lang);
         };
-
         // Takes a dir and returns an array of promises of all of its files
         let _getDirFiles = dirs => {
             let _promises =  dirs.map(dir => {
@@ -153,7 +152,6 @@ function repoService($q, $http, HTTP) {
             });
     }
     function flattenArray(dirFiles) {
-        // console.log(dirFiles)
         return  dirFiles.reduce((prevDir, currDir) =>  prevDir.concat(currDir));
     }
     function mergeFiles(dirFiles, appFiles) {
@@ -165,7 +163,6 @@ function repoService($q, $http, HTTP) {
         else {
             _files = flattenArray(_files);
         }
-        // console.log(_files)
         return _files;
     }
 

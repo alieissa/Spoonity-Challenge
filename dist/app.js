@@ -1,17 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _chartDirective = require('./chart.directive.js');
-
-var _languagesDirective = require('./languages.directive.js');
-
-var _reposDirective = require('./repos.directive.js');
-
 var _userDirective = require('./user.directive.js');
-
-var _repoDirective = require('./repo.directive.js');
-
-var _reposController = require('./repos.controller.js');
 
 var _repo = require('./repo.service');
 
@@ -19,21 +9,12 @@ var _settingsDirective = require('./settings.directive.js');
 
 angular.module('spoonityApp', ['ngRoute']).config(config).constant('HTTP', {
     baseUrl: 'https://api.github.com'
-}).controller('mainCtrl', mainCtrl).directive('aeChart', _chartDirective.aeChart).directive('aeLanguages', _languagesDirective.aeLanguages).directive('aeSettings', _settingsDirective.aeSettings).directive('aeRepos', _reposDirective.aeRepos).directive('aeRepo', _repoDirective.aeRepo).directive('aeUser', _userDirective.aeUser).factory('repoService', _repo.repoService);
+}).controller('mainCtrl', mainCtrl).directive('aeSettings', _settingsDirective.aeSettings).directive('aeUser', _userDirective.aeUser).factory('repoService', _repo.repoService);
 
 function config($routeProvider) {
 
     $routeProvider.when('/', {
         template: '<ae-user></ae-user>'
-    })
-    // $routeProvider.when('/', {
-    //     template: '<ae-repos></ae-repos>'
-    // })
-
-
-    //List langs for repo
-    .when('/:repo/languages', {
-        template: '<ae-languages></ae-languages>'
     }).otherwise({
         redirectTo: '/'
     });
@@ -45,124 +26,7 @@ function mainCtrl($rootScope) {
     });
 }
 
-},{"./chart.directive.js":2,"./languages.directive.js":3,"./repo.directive.js":4,"./repo.service":5,"./repos.controller.js":6,"./repos.directive.js":7,"./settings.directive.js":8,"./user.directive.js":9}],2:[function(require,module,exports){
-'use strict';
-
-// aeChart.$inject = ['reposService'];
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-function aeChart() {
-
-    var aeChart_ = {
-        templateUrl: 'main.html',
-        controllerAs: 'chart',
-        controller: controllerFn,
-        link: linkFn
-    };
-
-    return aeChart_;
-
-    function controllerFn() {
-        // console.log('Chart Controller');
-    }
-
-    function linkFn(scope, element, attrs) {
-        // console.log('Chart Link');
-    }
-}
-
-exports.aeChart = aeChart;
-
-},{}],3:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-aeLanguages.$inject = ['$routeParams', 'repoService'];
-
-function aeLanguages($routeParams, repoService) {
-
-    var aeLanguages_ = {
-        templateUrl: 'languages.html',
-        controllerAs: 'vm',
-        controller: controllerFn,
-        link: linkFn
-    };
-
-    return aeLanguages_;
-
-    function controllerFn() {
-
-        var vm = this;
-
-        repoService.getLanguages($routeParams.repo).then(function (result) {
-            vm.languages = result.data.languages;
-            // console.log(result);
-            return result.data.mainLanguage;
-        }).then(function (mainLanguage) {
-            // console.log(mainLanguage);
-            return repoService.getLanguageContent($routeParams.repo, mainLanguage);
-        });
-        // .then(content => console.log(content))
-        // .catch(err => vm.error = error);
-    }
-
-    function linkFn(scope, element, attrs) {
-        // console.log(element.find('button'));
-        // .on('click', function() {
-        //     console.log($routeParams);
-        // });
-        // console.log('Language Link');
-    }
-}
-
-exports.aeLanguages = aeLanguages;
-
-},{}],4:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-aeRepo.$inject = ['$routeParams', 'repoService'];
-
-function aeRepo($routeParams, repoService) {
-
-    var aeRepo_ = {
-        templateUrl: '<li></li>',
-        restrict: 'E',
-        transclude: true,
-        controllerAs: 'repo',
-        controller: controllerFn,
-        link: linkFn
-    };
-
-    return aeRepo_;
-
-    function controllerFn() {
-
-        var vm = this;
-        vm.test = function () {
-            console.log('Test');
-        };
-        console.log($routeParams);
-        // let _username = $state.current.params.username;
-        // repoService.getAllRepos($routeParams.username)
-        //     .then(repos => vm.repos = repos)
-        //     .catch(err => vm.err = err);
-    }
-
-    function linkFn(scope, element, attrs, ctrl) {
-        console.log(ctrl);
-    }
-}
-
-exports.aeRepo = aeRepo;
-
-},{}],5:[function(require,module,exports){
+},{"./repo.service":2,"./settings.directive.js":3,"./user.directive.js":4}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -184,7 +48,7 @@ var ABBRS = {
 };
 
 var Settings = {
-    languages: Object.keys(ABBRS),
+    languages: ABBRS,
     folders: ['app', 'scripts', 'src', 'util']
 };
 
@@ -196,8 +60,11 @@ function repoService($q, $http, HTTP) {
     var repoData = void 0;
     var _currentRepo_ = void 0;
 
-    function updateSettings(appFolder, langs) {
-        Settings.languages = langs;
+    function updateSettings(appFolder, languages) {
+        Settings.languages = {};
+        languages.map(function (language) {
+            return Settings.languages[language] = ABBRS[language];
+        });
         Settings.folders = appFolder.split(',');
     }
     // Gets Repo information for user
@@ -224,8 +91,7 @@ function repoService($q, $http, HTTP) {
         var _filterLanguageBlobs = function _filterLanguageBlobs(langs) {
             return langs.filter(function (lang) {
                 var ext = lang.path.split('.').pop();
-
-                return ABBRS[language] === ext;
+                return Settings.languages[language] === ext;
             });
         };
 
@@ -263,7 +129,7 @@ function repoService($q, $http, HTTP) {
             return languages.map(function (language) {
                 var ext = language.path.split('.').pop();
 
-                if (Object.values(ABBRS).includes(ext)) {
+                if (Object.values(Settings.languages).includes(ext)) {
                     return ext;
                 }
             });
@@ -272,8 +138,8 @@ function repoService($q, $http, HTTP) {
         // Get the lanugage of each extension
         var _mapExtensionsToLang = function _mapExtensionsToLang(extensions) {
             return Array.from(extensions).map(function (ext) {
-                var language_ = Object.keys(ABBRS).filter(function (key) {
-                    return ABBRS[key] === ext;
+                var language_ = Object.keys(Settings.languages).filter(function (key) {
+                    return Settings.languages[key] === ext;
                 })[0];
                 return language_;
             });
@@ -303,9 +169,8 @@ function repoService($q, $http, HTTP) {
 
         var _findLang = function _findLang(blob) {
             var _lang = blob.path.split('.').pop();
-            return Object.values(ABBRS).includes(_lang);
+            return Object.values(Settings.languages).includes(_lang);
         };
-
         // Takes a dir and returns an array of promises of all of its files
         var _getDirFiles = function _getDirFiles(dirs) {
             var _promises = dirs.map(function (dir) {
@@ -348,7 +213,6 @@ function repoService($q, $http, HTTP) {
         });
     }
     function flattenArray(dirFiles) {
-        // console.log(dirFiles)
         return dirFiles.reduce(function (prevDir, currDir) {
             return prevDir.concat(currDir);
         });
@@ -361,7 +225,6 @@ function repoService($q, $http, HTTP) {
         } else {
             _files = flattenArray(_files);
         }
-        // console.log(_files)
         return _files;
     }
 
@@ -370,95 +233,7 @@ function repoService($q, $http, HTTP) {
 
 exports.repoService = repoService;
 
-},{}],6:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-repoCtrl.$inject = ['$routeParams', 'repoService'];
-
-function repoCtrl($routeParams, repoService) {
-
-    // let vm = this;
-    //
-    // console.log($routeParams);
-    // // let _username = $state.current.params.username;
-    // repoService.getAllRepos(_username)
-    //     .then(repos => vm.repos = repos)
-    //     .catch(err => vm.err = err);
-}
-
-exports.repoCtrl = repoCtrl;
-
-},{}],7:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-aeRepos.$inject = ['$routeParams', 'repoService'];
-
-function aeRepos($routeParams, repoService) {
-
-    var aeRepos_ = {
-        templateUrl: 'repos.html',
-        restrict: 'E',
-        controllerAs: 'vm',
-        controller: controllerFn,
-        link: linkFn
-    };
-
-    return aeRepos_;
-
-    function controllerFn() {
-
-        var vm = this;
-
-        vm.chartContent = '';
-        vm.languages = '';
-        vm.repo = '';
-
-        vm.changeLang = function (lang) {
-            console.log(lang);
-
-            repoService.getLanguageContent(vm.repo, lang).then(function (content) {
-                return vm.chartContent = window.atob(content[0]);
-            });
-        };
-
-        vm.changeRepo = function (repo) {
-            // console.log(repo);
-
-            repoService.getLanguages(repo).then(function (result) {
-                return vm.languages = result.data;
-            }).then(function (languages) {
-                return vm.changeLang(languages.mainLanguage);
-            });
-        };
-
-        init('alieissa');
-
-        function init(username) {
-            repoService.getAllRepos(username).then(function (repos) {
-                return vm.changeRepo(repos[0]);
-            })
-            // .then(result => vm.languages = result.data.languages)
-            .catch(function (err) {
-                return vm.err = err;
-            });
-        }
-    }
-
-    function linkFn(scope, element, attrs) {
-        console.log(scope.vm);
-        console.log(attrs);
-    }
-}
-
-exports.aeRepos = aeRepos;
-
-},{}],8:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -481,9 +256,9 @@ aeSettings.$inject = ['repoService'];
 function aeSettings(repoService) {
     var aeSettings_ = {
         templateUrl: 'settings.html',
+        require: '^aeUser',
         scope: {
-            username: '@',
-            reInit: '&changeUser'
+            username: '@'
         },
         controller: controllerFn,
         controllerAs: 'settings',
@@ -494,12 +269,13 @@ function aeSettings(repoService) {
     return aeSettings_;
 
     function controllerFn() {
+
         var vm = this;
 
         vm.languages = Object.keys(ABBRS);
 
         // Defaul Settings
-        vm.appFolder = 'app';
+        vm.appFolders = 'app,scripts,src,util';
         vm.selectedLanguages = Object.keys(ABBRS);
 
         vm.updateLangs = function (lang, checked) {
@@ -512,13 +288,21 @@ function aeSettings(repoService) {
             }
         };
 
-        vm.updateSettings = function (username, appFolder, langs) {
-            repoService.updateSettings(appFolder, langs);
-            console.log(vm.username);
+        vm.updateSettings = function (username, appFolders, langs) {
+            repoService.updateSettings(appFolders, langs);
+            return vm.reInit(vm.username);
         };
     }
 
-    function linkFn(scope, element, attrs) {
+    function linkFn(scope, element, attrs, $ctrl) {
+
+        scope.settings.reInit = $ctrl.changeUser;
+
+        element.find('input[type=submit]').on('click', function () {
+            var _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
+            element.find('form').css('display', _display);
+        });
+
         element.find('i').on('click', function () {
             var _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
             element.find('form').css('display', _display);
@@ -528,7 +312,7 @@ function aeSettings(repoService) {
 
 exports.aeSettings = aeSettings;
 
-},{}],9:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -543,16 +327,15 @@ function aeUser(repoService) {
         restrict: 'E',
         transclude: true,
         controllerAs: 'user',
-        controller: controllerFn,
-        link: linkFn
+        controller: controllerFn
     };
 
     return aeUser_;
 
     function controllerFn() {
-
         var vm = this;
 
+        // Defaults
         vm.chartContent = '';
         vm.languages = '';
         vm.repo = '';
@@ -560,7 +343,6 @@ function aeUser(repoService) {
         vm.username = 'alieissa';
 
         vm.changeLang = function (username, repo, lang) {
-            console.log(username);
             repoService.getLanguageContent(username, repo, lang).then(function (content) {
                 vm.chartContent = window.atob(content[0]);
             }).catch(function (err) {
@@ -570,9 +352,13 @@ function aeUser(repoService) {
         };
 
         vm.changeRepo = function (username, repo) {
-            vm.repo = repo;
-
             repoService.getLanguages(username, repo).then(function (languages) {
+                // Dirty workaround
+                if (languages.length == 0) {
+                    alert('ERROR: ' + repo + ' does not have any of the desired languages');
+                    return;
+                }
+                vm.repo = repo;
                 vm.languages = languages;
                 vm.changeLang(username, repo, vm.languages[0]);
             });
@@ -592,11 +378,6 @@ function aeUser(repoService) {
                 return vm.changeRepo(username, repos[0]);
             });
         }
-    }
-
-    function linkFn() {
-        // console.log(scope.vm);
-        // console.log(attrs);
     }
 }
 

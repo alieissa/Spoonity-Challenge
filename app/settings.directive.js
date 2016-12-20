@@ -17,9 +17,9 @@ aeSettings.$inject = ['repoService'];
 function aeSettings(repoService) {
     let aeSettings_ = {
         templateUrl: 'settings.html',
+        require: '^aeUser',
         scope: {
-            username: '@',
-            reInit: '&changeUser'
+            username: '@'
         },
         controller: controllerFn,
         controllerAs: 'settings',
@@ -30,12 +30,13 @@ function aeSettings(repoService) {
     return aeSettings_;
 
     function controllerFn() {
+
         let vm = this;
 
         vm.languages = Object.keys(ABBRS);
 
         // Defaul Settings
-        vm.appFolder = 'app';
+        vm.appFolders = 'app,scripts,src,util';
         vm.selectedLanguages = Object.keys(ABBRS);
 
         vm.updateLangs = (lang, checked) => {
@@ -47,13 +48,21 @@ function aeSettings(repoService) {
             }
         };
 
-        vm.updateSettings = (username, appFolder, langs) => {
-            repoService.updateSettings(appFolder, langs);
-            console.log(vm.username)
+        vm.updateSettings = (username, appFolders, langs) => {
+            repoService.updateSettings(appFolders, langs);
+            return vm.reInit(vm.username);
         };
     }
 
-    function linkFn(scope, element, attrs) {
+    function linkFn(scope, element, attrs, $ctrl) {
+
+        scope.settings.reInit = $ctrl.changeUser;
+
+        element.find('input[type=submit]').on('click', () => {
+            let _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
+            element.find('form').css('display', _display);
+        });
+
         element.find('i').on('click', () => {
             let _display = element.find('form').css('display') === 'none' ? 'block' : 'none';
             element.find('form').css('display', _display);

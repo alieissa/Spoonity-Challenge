@@ -45,6 +45,7 @@ function clean(done) {
 
 function dist(done) {
     shell.cp('-r', `${sourceRoot}/*.html`, destRoot);
+    shell.cp('-r', `${sourceRoot}/*.css`, destRoot);
     done();
 }
 

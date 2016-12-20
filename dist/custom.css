@@ -1,0 +1,68 @@
+body {
+    margin-top: 0px
+}
+ul {
+     list-style: none;
+     padding: 0px;
+}
+li {
+    padding: 6px 16px 0px 16px;
+    height: 33px;
+    font-size: 14x;
+    font-family: Roboto Regular 16sp
+}
+
+.tab-container {
+    float: left;
+    margin-left: 30px;
+    margin-right: 30px;
+    min-width: 500px"
+}
+
+.repo-container {
+    float:left;
+    height: 100%;
+    position: fixed;
+    top: 100px
+}
+.repo-tab {
+    float: left;
+    font-size: 14px;
+    min-width: 48px;
+    height: 33px;
+    padding: 8px
+}
+.menu-container {
+    width: 1000px;
+    height: 86px;
+    margin-left: 202px;
+    position: fixed;
+    padding-top: 30px;
+    background-color: white;
+}
+.lang-tab {
+    float: left;
+    font-size: 14px;
+    min-width: 48px;
+    height: 33px;
+    padding: 8px
+}
+/*code[class*="language-"], pre[class*="language-"] {
+    line-height: 1.5
+}*/
+
+.active-repo {
+    border-right: 1px solid grey
+}
+.chart {
+    position: absolute;
+    top: 35px;
+    left: 220px;
+    background-color: white;
+    max-height: 500px;
+    width: 950px;
+    padding-top: 40px;
+    padding-left: 25px;
+    float: left;
+    z-index: -1;
+}
